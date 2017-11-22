@@ -1,5 +1,5 @@
 package antiSpamFilter;
-// Comment
+// Comment++
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder;
 import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
@@ -40,7 +40,7 @@ public class AntiSpamFilterAutomaticConfiguration {
             .setExperimentBaseDirectory(experimentBaseDirectory)
             .setOutputParetoFrontFileName("FUN")
             .setOutputParetoSetFileName("VAR")
-            .setReferenceFrontDirectory(experimentBaseDirectory+"/SOLUCOES")
+            .setReferenceFrontDirectory(experimentBaseDirectory+"/RESULTADOS")
             .setIndicatorList(Arrays.asList(new PISAHypervolume<DoubleSolution>()))
             .setIndependentRuns(INDEPENDENT_RUNS)
             .setNumberOfCores(8)
