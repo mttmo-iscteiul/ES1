@@ -10,4 +10,4 @@ Identificação do número, nome e papel de cada membro do grupo:
 
 Identificação da variante do projeto desenvolvida: AntiSpamConfigurationForProfessionalAndLeisureMailbox)
 
-Link para um vídeo no youtube com a demonstraÃ§Ã£o da aplicaÃ§Ã£o final desenvolvida: Por desenvolver
+Link para um vídeo no youtube com a demonstração da aplicaçãoo final desenvolvida: Por desenvolver
