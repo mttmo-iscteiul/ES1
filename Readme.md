@@ -1,13 +1,13 @@
-Identifica√ß√£o da turma: IC1
+IdentificaÁ„o da turma: IC1
 
-Identifica√ß√£o do grupO: 69
+IdentificaÁ„o do grupO: 69
 
-Identifica√ß√£o do n√∫mero, nome e papel de cada membro do grupo:
+IdentificaÁ„o do n˙mero, nome e papel de cada membro do grupo:
 - MoisÈs Sambongo, 61632, SCRUM Master
 - Martim Machado, 72722, Developer
 - Hugo Rodrigues, 64546, Developer
 - Francisco Barreto, 73706, Quality Manager
 
-Identifica√ß√£o da variante do projeto desenvolvida: AntiSpamConfigurationForProfessionalAndLeisureMailbox)
+IdentificaÁ„o da variante do projeto desenvolvida: AntiSpamConfigurationForProfessionalAndLeisureMailbox)
 
-Link para um v√≠deo no youtube com a demonstra√ß√£o da aplica√ß√£o final desenvolvida: Por desenvolver
+Link para um vÌdeo no youtube com a demonstra√ß√£o da aplica√ß√£o final desenvolvida: Por desenvolver
