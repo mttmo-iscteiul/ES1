@@ -1,8 +1,6 @@
 /* 
- * This is the version that contains the GUI but without any action listeners 
- * development. But in the mean time, it has been developed a frame that contains 
- * JTabbedPane to alternate between the manual input table and the automatic input
- * version.
+ * This is the version that contains the GUI with only one action listener developed
+ * and with the manualInputCalculation available for use.
  */
 package antiSpamFilter;
 
@@ -16,8 +14,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -29,7 +27,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
@@ -57,6 +54,10 @@ public class GUI {
 	private JTextField pathSpam = new JTextField("spam.log");
 	private JTextField pathHam = new JTextField("ham.log");
 	private JButton calculate = new JButton("Calculate");
+	private JLabel fpLabel = new JLabel("FP");
+	private JLabel fnLabel = new JLabel("FN");
+	private JTextField fp = new JTextField();
+	private JTextField fn = new JTextField();
 
 	public static void main(String[] args) {
 		try {
@@ -84,6 +85,7 @@ public class GUI {
 			while ((line = bf.readLine()) != null) {
 				rules.add(line);
 			}
+			bf.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -132,8 +134,8 @@ public class GUI {
 		editable.setColumnIdentifiers(new Object[] { "RULES", "WEIGHTS" });
 		nonEditable.setColumnIdentifiers(new Object[] { "RULES", "WEIGHTS" });
 		for (String rule : rules) {
-			editable.addRow(new Object[] { rule, 0 });
-			nonEditable.addRow(new Object[] { rule, 0 });
+			nonEditable.addRow(new Object[] { rule, 0.0 });
+			editable.addRow(new Object[] { rule, 0.0 });
 		}
 
 		editableTable.setModel(editable);
@@ -149,14 +151,14 @@ public class GUI {
 
 		tabs.add("Automatic Input Table", nonEditablePanel);
 		tabs.add("Manual Input Table", editablePanel);
-		
+
 		tabs.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				tabbedChangedAction(arg0);
 			}
 		});
-		
+
 		generate.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -171,14 +173,23 @@ public class GUI {
 			}
 		});
 
+		fp.setColumns(3);
+		fp.setHorizontalAlignment(JTextField.CENTER);
+		fn.setColumns(3);
+		fn.setHorizontalAlignment(JTextField.CENTER);
+
 		sPanel.add(generate);
+		sPanel.add(fpLabel);
+		sPanel.add(fp);
+		sPanel.add(fnLabel);
+		sPanel.add(fn);
 		sPanel.add(calculate);
 
 		frame.add(nPanel, BorderLayout.NORTH);
 		frame.add(tabs, BorderLayout.CENTER);
 		frame.add(sPanel, BorderLayout.SOUTH);
 	}
-	
+
 	private void tabbedChangedAction(ChangeEvent e) {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 			@Override
@@ -192,7 +203,7 @@ public class GUI {
 			}
 		};
 		worker.execute();
-	}	
+	}
 
 	private void generateAction() {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
@@ -216,14 +227,29 @@ public class GUI {
 	}
 
 	private void calculateAction() {
-		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+		SwingWorker<String[], Void> worker = new SwingWorker<String[], Void>() {
 			@Override
-			protected Void doInBackground() throws Exception {
+			protected String[] doInBackground() throws Exception {
 				calculate.setEnabled(false);
 				System.out.println("Calculate FP &b FN using current table");
-				Thread.currentThread().sleep(3000);
+				ManualInputCalculation mic = new ManualInputCalculation(editable);
+				String[] fpn = new String[2];
+				fpn[0] = mic.getFp();
+				fpn[1] = mic.getFn();
 				calculate.setEnabled(true);
-				return null;
+				return fpn;
+			}
+
+			@Override
+			public void done() {
+				try {
+					String[] fpn = get();
+					fp.setText(fpn[0]);
+					fn.setText(fpn[1]);
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+
 			}
 		};
 		worker.execute();
