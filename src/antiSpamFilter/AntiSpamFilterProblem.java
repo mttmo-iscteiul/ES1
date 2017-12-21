@@ -6,12 +6,12 @@ import java.util.List;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 
+@SuppressWarnings("serial")
 public class AntiSpamFilterProblem extends AbstractDoubleProblem {
 
 	private GUI_Worker g_Worker;
-	
+
 	public AntiSpamFilterProblem(GUI_Worker g_Worker) {
-		// 10 variables (anti-spam filter rules) by default
 		this(g_Worker.getRulesSize(), g_Worker);
 		this.g_Worker = g_Worker;
 	}
@@ -33,14 +33,16 @@ public class AntiSpamFilterProblem extends AbstractDoubleProblem {
 		setUpperLimit(upperLimit);
 	}
 
+	/**
+	 * Method parameterized to evaluate the FN and FP in the current Solution.
+	 */
 	public void evaluate(DoubleSolution solution) {
-		double aux, xi, xj;
 		double[] fx = new double[getNumberOfObjectives()];
 		double[] x = new double[getNumberOfVariables()];
 		for (int i = 0; i < solution.getNumberOfVariables(); i++) {
 			x[i] = solution.getVariableValue(i);
 		}
-		g_Worker.updateMap(x);
+		g_Worker.updateMapByVector(x);
 		// FN
 		fx[0] = g_Worker.calculateFN();
 

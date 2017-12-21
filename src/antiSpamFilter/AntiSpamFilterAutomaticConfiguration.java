@@ -57,7 +57,6 @@ public class AntiSpamFilterAutomaticConfiguration {
 			e.printStackTrace();
 		}
 		
-
 	}
 
 	static List<ExperimentAlgorithm<DoubleSolution, List<DoubleSolution>>> configureAlgorithmList(
