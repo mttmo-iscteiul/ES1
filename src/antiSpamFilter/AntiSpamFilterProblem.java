@@ -42,12 +42,12 @@ public class AntiSpamFilterProblem extends AbstractDoubleProblem {
 		for (int i = 0; i < solution.getNumberOfVariables(); i++) {
 			x[i] = solution.getVariableValue(i);
 		}
-		g_Worker.updateMapByVector(x);
+		g_Worker.updateMapByVector(x, 0);
 		// FN
-		fx[0] = g_Worker.calculateFN();
+		fx[0] = g_Worker.calculateFN(0);
 
 		// FP
-		fx[1] = g_Worker.calculateFP();
+		fx[1] = g_Worker.calculateFP(0);
 
 		solution.setObjective(0, fx[0]);
 		solution.setObjective(1, fx[1]);

@@ -1,6 +1,7 @@
 /* 
- * This version has another class that works behind the GUI class. ONLY VARIATION INDEPENDENT RUNS = 1
+ * This version has another class that works behind the GUI class. GUI ready
  */
+
 package antiSpamFilter;
 
 import java.awt.BorderLayout;
@@ -9,11 +10,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -33,6 +34,7 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  * This Class is the Graphical User Interface of the project.
+ * 
  * @author ES1-2017-IC1-69
  */
 public class GUI {
@@ -54,10 +56,12 @@ public class GUI {
 	private JLabel labelPathSpam = new JLabel("Path spam");
 	private JLabel labelPathHam = new JLabel("Path ham");
 	private JButton generate = new JButton("Auto Config");
-	private JTextField pathRules = new JTextField("");
-	private JTextField pathSpam = new JTextField("spam.log");
-	private JTextField pathHam = new JTextField("ham.log");
+	private JTextField pathRules = new JTextField();
+	private JTextField pathSpam = new JTextField();
+	private JTextField pathHam = new JTextField();
 	private JButton calculate = new JButton("Calculate");
+	private JButton saveAuto = new JButton("Save Auto.");
+	private JButton saveMan = new JButton("Save Man.");
 	private JLabel fpLabel = new JLabel("FP");
 	private JLabel fnLabel = new JLabel("FN");
 	private JTextField fp = new JTextField();
@@ -77,34 +81,41 @@ public class GUI {
 	}
 
 	/**
-	 * This method is used to construct from scratch the specified
-	 * Graphical User Interface
+	 * This method is used to construct from scratch the specified Graphical
+	 * User Interface
 	 */
 	public GUI() {
-		// readFiles();
-		this.g_Worker = new GUI_Worker();
+		startGUI_Worker();
 		addFrameContent();
+		addGUI_WorkerContent();
 		frame.setVisible(true);
+		// NSGAIIReady();
+		// g_Worker.defaultPath();
 	}
 
 	/**
-	 * This method "builds" the Graphical User Interface with all the necessary Swing components
+	 * This method "builds" the Graphical User Interface with all the necessary
+	 * Swing components
 	 */
+	@SuppressWarnings("serial")
 	private void addFrameContent() {
 		frame.setLayout(new BorderLayout());
-		frame.setPreferredSize(new Dimension(520, 575));
+		frame.setPreferredSize(new Dimension(575, 575));
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.pack();
-		
+
 		pathRules.setColumns(5);
 		pathRules.setHorizontalAlignment(JTextField.CENTER);
 		pathRules.setText(g_Worker.getRulesFile());
+		pathRules.setEditable(false);
 		pathSpam.setColumns(5);
 		pathSpam.setHorizontalAlignment(JTextField.CENTER);
 		pathSpam.setText(g_Worker.getSpamFile());
+		pathSpam.setEditable(false);
 		pathHam.setColumns(5);
 		pathHam.setHorizontalAlignment(JTextField.CENTER);
 		pathHam.setText(g_Worker.getHamFile());
+		pathHam.setEditable(false);
 
 		nPanel.add(labelPathRules);
 		nPanel.add(pathRules);
@@ -135,10 +146,6 @@ public class GUI {
 
 		editable.setColumnIdentifiers(new Object[] { "RULES", "WEIGHTS" });
 		nonEditable.setColumnIdentifiers(new Object[] { "RULES", "WEIGHTS" });
-		for (String rule : g_Worker.getRules().keySet()) {
-			editable.addRow(new Object[] { rule, g_Worker.getRules().get(rule) });
-			nonEditable.addRow(new Object[] { rule, g_Worker.getRules().get(rule) });
-		}
 
 		editableTable.setModel(editable);
 		nonEditableTable.setModel(nonEditable);
@@ -189,28 +196,60 @@ public class GUI {
 			}
 		});
 
+		saveAuto.setEnabled(false);
+		saveAuto.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				saveAutoFile();
+			}
+		});
+
+		saveMan.setEnabled(false);
+		saveMan.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				saveManFile();
+			}
+		});
+
 		fp.setColumns(3);
 		fp.setHorizontalAlignment(JTextField.CENTER);
 		fn.setColumns(3);
 		fn.setHorizontalAlignment(JTextField.CENTER);
 
+		sPanel.add(saveAuto);
 		sPanel.add(generate);
 		sPanel.add(fpLabel);
 		sPanel.add(fp);
 		sPanel.add(fnLabel);
 		sPanel.add(fn);
 		sPanel.add(calculate);
+		sPanel.add(saveMan);
 
 		frame.add(nPanel, BorderLayout.NORTH);
 		frame.add(tabs, BorderLayout.CENTER);
 		frame.add(sPanel, BorderLayout.SOUTH);
 	}
 
+	private void startGUI_Worker() {
+		this.g_Worker = new GUI_Worker();
+	}
+
+	private void addGUI_WorkerContent() {
+		for (String rule : g_Worker.getRules().keySet()) {
+			editable.addRow(new Object[] { rule, g_Worker.getRules().get(rule) });
+			nonEditable.addRow(new Object[] { rule, g_Worker.getRules().get(rule) });
+		}
+	}
+
 	/**
-	 * This is the Swing Worker that will be responsible for "flagging" the program, every time
-	 * the tabs are switched with one another. Also disenable the generate JButton.
-	 * @param This parameter is used to get the source of the event, to let the program know
-	 * which tabs was selected.
+	 * This is the Swing Worker that will be responsible for "flagging" the
+	 * program, every time the tabs are switched with one another. Also
+	 * disenable the generate JButton.
+	 * 
+	 * @param This
+	 *            parameter is used to get the source of the event, to let the
+	 *            program know which tabs was selected.
 	 */
 	private void tabbedChangedAction(ChangeEvent e) {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
@@ -228,15 +267,16 @@ public class GUI {
 	}
 
 	/**
-	 * This is the Swing Worker that will be responsible for handling the generate JButton, which
-	 * is the trigger to the jMetall to run.
-	 *   
+	 * This is the Swing Worker that will be responsible for handling the
+	 * generate JButton, which is the trigger to the jMetall to run.
+	 * 
 	 */
 	private void generateAction() {
-		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+		SwingWorker<Integer, Void> worker = new SwingWorker<Integer, Void>() {
 			@Override
-			protected Void doInBackground() throws Exception {
+			protected Integer doInBackground() throws Exception {
 				generate.setEnabled(false);
+				int j = 0;
 				if (tabs.getSelectedIndex() == 0) {
 					new AntiSpamFilterAutomaticConfiguration(g_Worker);
 					g_Worker.setNewConfiguration();
@@ -246,29 +286,50 @@ public class GUI {
 						double weight = ((int) (Math.random() * (5.0 - -5.0))) + -5.0;
 						rWeights[i] = weight;
 					}
-					g_Worker.updateMapByVector(rWeights);
+					g_Worker.updateMapByVector(rWeights, 1);
+					j = 1;
 				}
 	
-				return null;
+				return j;
 			}
 
 			@Override
 			public void done() {
-				int i = 0;
-				for (String rule : g_Worker.getRules().keySet()) {
-					editable.setValueAt(g_Worker.getRules().get(rule), i, 1);
-					nonEditable.setValueAt(g_Worker.getRules().get(rule), i, 1);
-					i++;
+				try {
+					int opt = get();
+					switch (opt) {
+					case 0:
+						int i = 0;
+						for (String rule : g_Worker.getRules().keySet()) {
+							editable.setValueAt(g_Worker.getRules().get(rule), i, 1);
+							nonEditable.setValueAt(g_Worker.getRules().get(rule), i, 1);
+							i++;
+						}
+						saveAuto.setEnabled(true);
+						break;
+					case 1:
+						int j = 0;
+						for(String rule: g_Worker.getManualConfig().keySet()) {
+							editable.setValueAt(g_Worker.getManualConfig().get(rule), j, 1);
+							j++;
+						}
+						saveMan.setEnabled(true);
+						break;
+					}
+					generate.setEnabled(true);
+					
+				} catch(InterruptedException | ExecutionException e) {
+					e.printStackTrace();
 				}
-				generate.setEnabled(true);
+				
 			}
 		};
 		worker.execute();
 	}
 
 	/**
-	 * This is the Swing Worker responsible for calculate the FP큦 and FN큦, using the the values of
-	 * the current tab.
+	 * This is the Swing Worker responsible for calculate the FP큦 and FN큦,
+	 * using the the values of the current tab.
 	 */
 	private void calculateAction() {
 		SwingWorker<String[], Void> worker = new SwingWorker<String[], Void>() {
@@ -280,8 +341,8 @@ public class GUI {
 					tab = 1;
 				}
 				String[] fpn = new String[2];
-				fpn[0] = Integer.toString(g_Worker.calculateFP());
-				fpn[1] = Integer.toString(g_Worker.calculateFN());
+				fpn[0] = Integer.toString(g_Worker.calculateFP(tab));
+				fpn[1] = Integer.toString(g_Worker.calculateFN(tab));
 				calculate.setEnabled(true);
 				return fpn;
 			}
@@ -295,7 +356,28 @@ public class GUI {
 				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
 				}
+			}
+		};
+		worker.execute();
+	}
 
+	private void saveAutoFile() {
+		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() throws Exception {
+				g_Worker.writeFile("AutomaticConfiguration");
+				return null;
+			}
+		};
+		worker.execute();
+	}
+
+	private void saveManFile() {
+		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			@Override
+			protected Void doInBackground() {
+				g_Worker.writeFile("ManualConfiguration");
+				return null;
 			}
 		};
 		worker.execute();
