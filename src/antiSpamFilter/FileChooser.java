@@ -3,36 +3,56 @@ package antiSpamFilter;
 import java.io.File;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+/**
+ * This class is responsible for receiving the paths given by the user, from
+ * where will give them to the GUI_Worker class to upload them into the
+ * application memory
+ * 
+ * @author ES1-2017-IC1-69
+ *
+ */
 public class FileChooser {
 
-	private String hamFile;
-	private String spamFile;
+	private FileNameExtensionFilter filter;
+	private String filePath;
 
-	public FileChooser() {
-		JFileChooser fcHam = new JFileChooser();
-		fcHam.setDialogTitle("escolha o ficheiro ham");
-		fcHam.setCurrentDirectory(new File(System.getProperty("user.home")));
-		int resultHam = fcHam.showOpenDialog(null);
-		if (resultHam == JFileChooser.APPROVE_OPTION) {
-			hamFile = fcHam.getSelectedFile().getAbsolutePath();
+	/**
+	 * This constructor initializes all three functions of this class to receive
+	 * the paths from the user.
+	 * @param extension This the extension file pretended to select
+	 * @param header This is the frame title pretended to appear 
+	 */
+
+	public FileChooser(String extension, String header) {
+		JFileChooser fc = new JFileChooser();
+		fc.setDialogTitle(header);
+		filter = new FileNameExtensionFilter(extension, extension);
+		fc.setFileFilter(filter);
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.setCurrentDirectory(new File(System.getProperty("user.home")));
+		int resultRules = fc.showOpenDialog(null);
+		if (resultRules == JFileChooser.APPROVE_OPTION) {
+			filePath = fc.getSelectedFile().getAbsolutePath();
+		} else if (resultRules == 1) {
+			System.exit(0);
+		} else {
+			JOptionPane.showMessageDialog(null, "Non valid input");
+			System.exit(0);
 		}
-		JFileChooser fcSpam = new JFileChooser();
-		fcSpam.setDialogTitle("escolha o ficheiro spam");
-		fcSpam.setCurrentDirectory(new File(System.getProperty("user.home")));
-		int resultSpam = fcSpam.showOpenDialog(null);
-		if (resultSpam == JFileChooser.APPROVE_OPTION) {
-			spamFile = fcSpam.getSelectedFile().getAbsolutePath();
-		}
 
 	}
 
-	public String getHamFile() {
-		return hamFile;
-	}
+	/**
+	 * This method returns the path from the current file selected
+	 * 
+	 * @return Current file path selected
+	 *
+	 */
 
-	public String getSpamFile() {
-		return spamFile;
+	public String getFilePath() {
+		return filePath;
 	}
-
 }

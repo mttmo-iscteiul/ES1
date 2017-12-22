@@ -15,17 +15,17 @@ import javax.swing.JOptionPane;
 
 /**
  * This Class is the "worker" class. Its main function is to attend all of GUI´s
- * requests and return the respective outputs.
+ * requests and some of the AntiSpamFilterProblem class and return the
+ * respective outputs.
  * 
  * @author ES1-2017-IC1-69
  *
  */
 public class GUI_Worker {
 
-	private FileChooser fc;
 	private String hamFile;
 	private String spamFile;
-	private String rulesFile = "rules.cf";
+	private String rulesFile;
 	private LinkedHashMap<String, Double> rules = new LinkedHashMap<String, Double>();
 	private LinkedHashMap<String, Double> manualConfig = new LinkedHashMap<String, Double>();
 	private ArrayList<ArrayList<String>> spam = new ArrayList<ArrayList<String>>();
@@ -34,23 +34,24 @@ public class GUI_Worker {
 	private int fn = 0;
 
 	/**
-	 * This is the constructor of this class, which is initialized and uploads
-	 * the default rules to the memory, or, if already exists a file that
-	 * contains the previous configurations, it will upload that one instead. It
-	 * also loads the spam.log and ham.log files to memory, for an optimized
-	 * "search for" method in both files.
+	 * This is the constructor of this class, which is initialized by the GUI
+	 * class. Firstly initializes the FileChooser class to allow the user to
+	 * choose the path to the needed files to run the program. Secondly, uploads
+	 * the rules present in the rules path file to the memory. It also loads the
+	 * information present in the spamFile and hamFile to memory, for an
+	 * optimized.
 	 */
 	public GUI_Worker() {
-		fc = new FileChooser();
 		readFiles();
 	}
-	
+
 	/**
 	 * This class loads all the necessary files to memory for later usage.
 	 */
 	private void readFiles() {
-		hamFile = fc.getHamFile();
-		spamFile = fc.getSpamFile();
+		rulesFile = new FileChooser("cf", "Escolha o ficheiro Rules").getFilePath();
+		hamFile = new FileChooser("log", "Escolha o ficheiro Ham").getFilePath();;
+		spamFile = new FileChooser("log", "Escolha o ficheiro Spam").getFilePath();
 		BufferedReader bf = null;
 		try {
 			bf = new BufferedReader(new FileReader(new File(rulesFile)));
@@ -68,7 +69,9 @@ public class GUI_Worker {
 			}
 			bf.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,
+					"The input given by the user for the rules path is incorrect. Confirm to exit.");
+			System.exit(0);
 		}
 		try {
 			bf = new BufferedReader(new FileReader(new File(spamFile)));
@@ -82,8 +85,9 @@ public class GUI_Worker {
 			}
 			bf.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,
+					"The input given by the user for the spam path is incorrect. Confirm to exit.");
+			System.exit(0);
 		}
 		try {
 			bf = new BufferedReader(new FileReader(new File(hamFile)));
@@ -97,8 +101,9 @@ public class GUI_Worker {
 			}
 			bf.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,
+					"The input given by the user for the ham path is incorrect. Confirm to exit.");
+			System.exit(0);
 		}
 	}
 
@@ -112,11 +117,16 @@ public class GUI_Worker {
 	 *            save the manual input configuration.
 	 */
 	protected void writeFile(String option) {
+		
+		BufferedWriter pw;
 		try {
-			BufferedWriter pw = new BufferedWriter(
-					new FileWriter("AntiSpamConfigurationForBalancedProfessionalAndLeisureMailbox/" + rulesFile));
 			switch (option) {
+			default:
 			case "AutomaticConfiguration":
+				File file = new File("AntiSpamConfigurationForBalancedProfessionalAndLeisureMailbox/rules.cf");
+				file.getParentFile().mkdir();
+				file.createNewFile();
+				pw = new BufferedWriter(new FileWriter(file));
 				for (String line : rules.keySet()) {
 					pw.write(line + "\t" + Double.toString(rules.get(line)) + "\n");
 				}
@@ -124,11 +134,13 @@ public class GUI_Worker {
 				JOptionPane.showMessageDialog(null, "The Automatic config. file was saved!");
 				break;
 			case "ManualConfiguration":
+				pw = new BufferedWriter(new FileWriter(rulesFile));
 				for (String line : manualConfig.keySet()) {
 					pw.write(line + "\t" + Double.toString(manualConfig.get(line)) + "\n");
 				}
 				pw.close();
 				JOptionPane.showMessageDialog(null, "The Manual config. file was saved!");
+				break;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -138,26 +150,30 @@ public class GUI_Worker {
 
 	/**
 	 * One of two methods to update the memory with the current values of each
-	 * weight. In this particualar one, the memory is updated by an array of
+	 * weight. In this particular one, the memory is updated by an array of
 	 * double values.
 	 * 
 	 * @param x
 	 *            The current weights to be loaded into the memory.
 	 */
 	protected void updateMapByVector(double[] x, int opt) {
-		switch (opt) {
-		case 0:
-			int i = 0;
-			for (String rule : rules.keySet()) {
-				rules.put(rule, x[i]);
-				i++;
-			}
-			break;
-		case 1:
-			int j = 0;
-			for (String rule : manualConfig.keySet()) {
-				manualConfig.put(rule, x[j]);
-				j++;
+		if (x instanceof double[]) {
+			switch (opt) {
+			default:
+			case 0:
+				int i = 0;
+				for (String rule : rules.keySet()) {
+					rules.put(rule, x[i]);
+					i++;
+				}
+				break;
+			case 1:
+				int j = 0;
+				for (String rule : manualConfig.keySet()) {
+					manualConfig.put(rule, x[j]);
+					j++;
+				}
+				break;
 			}
 		}
 	}
@@ -300,7 +316,7 @@ public class GUI_Worker {
 	public String getSpamFile() {
 		return spamFile;
 	}
-	
+
 	public HashMap<String, Double> getRules() {
 		return rules;
 	}

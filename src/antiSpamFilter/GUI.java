@@ -1,23 +1,15 @@
-/* 
- * This version has another class that works behind the GUI class. GUI ready
- */
-
 package antiSpamFilter;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -89,13 +81,12 @@ public class GUI {
 		addFrameContent();
 		addGUI_WorkerContent();
 		frame.setVisible(true);
-		// NSGAIIReady();
-		// g_Worker.defaultPath();
+
 	}
 
 	/**
 	 * This method "builds" the Graphical User Interface with all the necessary
-	 * Swing components
+	 * Swing components and their specifications parameterized to our needs
 	 */
 	@SuppressWarnings("serial")
 	private void addFrameContent() {
@@ -124,6 +115,11 @@ public class GUI {
 		nPanel.add(labelPathHam);
 		nPanel.add(pathHam);
 
+		/**
+		 * This was developed to enable the editing of the user input table only
+		 * in the weight values.
+		 */
+
 		editable = new DefaultTableModel() {
 			@Override
 			public boolean isCellEditable(int row, int column) {
@@ -136,6 +132,11 @@ public class GUI {
 				}
 			}
 		};
+
+		/**
+		 * This was developed to disenable the editing of any value present in
+		 * the GUI automatic input table.
+		 */
 
 		nonEditable = new DefaultTableModel() {
 			@Override
@@ -167,6 +168,12 @@ public class GUI {
 				tabbedChangedAction(arg0);
 			}
 		});
+
+		/**
+		 * This method allows the application to recognize the user inputs in
+		 * the manual input table to proceed the storage of those same edited
+		 * values in the application memory.
+		 */
 
 		editableTable.getModel().addTableModelListener(new TableModelListener() {
 			@Override
@@ -268,7 +275,11 @@ public class GUI {
 
 	/**
 	 * This is the Swing Worker that will be responsible for handling the
-	 * generate JButton, which is the trigger to the jMetall to run.
+	 * generate JButton, which is the trigger to the jMetall to run if the
+	 * present selected table is the automatic input one. If the present
+	 * selected table is the manual input one, generates randomly input values.
+	 * The JButton generate text is updated while switching between the two
+	 * tables.
 	 * 
 	 */
 	private void generateAction() {
@@ -280,6 +291,7 @@ public class GUI {
 				if (tabs.getSelectedIndex() == 0) {
 					new AntiSpamFilterAutomaticConfiguration(g_Worker);
 					g_Worker.setNewConfiguration();
+					new ExternalApplications();
 				} else {
 					double[] rWeights = new double[335];
 					for (int i = 0; i < rWeights.length; i++) {
@@ -289,15 +301,16 @@ public class GUI {
 					g_Worker.updateMapByVector(rWeights, 1);
 					j = 1;
 				}
-	
+
 				return j;
 			}
 
 			@Override
-			public void done() {
+			protected void done() {
 				try {
 					int opt = get();
 					switch (opt) {
+					default:
 					case 0:
 						int i = 0;
 						for (String rule : g_Worker.getRules().keySet()) {
@@ -306,10 +319,11 @@ public class GUI {
 							i++;
 						}
 						saveAuto.setEnabled(true);
+						saveMan.setEnabled(true);
 						break;
 					case 1:
 						int j = 0;
-						for(String rule: g_Worker.getManualConfig().keySet()) {
+						for (String rule : g_Worker.getManualConfig().keySet()) {
 							editable.setValueAt(g_Worker.getManualConfig().get(rule), j, 1);
 							j++;
 						}
@@ -317,11 +331,11 @@ public class GUI {
 						break;
 					}
 					generate.setEnabled(true);
-					
-				} catch(InterruptedException | ExecutionException e) {
+
+				} catch (InterruptedException | ExecutionException e) {
 					e.printStackTrace();
 				}
-				
+
 			}
 		};
 		worker.execute();
@@ -361,6 +375,11 @@ public class GUI {
 		worker.execute();
 	}
 
+	/**
+	 * This is the method responsible for saving the automatic input table.
+	 * 
+	 */
+
 	private void saveAutoFile() {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 			@Override
@@ -371,6 +390,11 @@ public class GUI {
 		};
 		worker.execute();
 	}
+
+	/**
+	 * This is the method responsible for saving the manual input table.
+	 * 
+	 */
 
 	private void saveManFile() {
 		SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
